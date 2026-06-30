@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Maveria — The Defensibility Layer for AI-Driven Discovery</title>
+<meta name="description" content="Maveria is the independent verification and privilege-protection layer that sits on top of any e-discovery platform — stress-testing AI coding, catching privileged and hallucinated documents before production, and generating the court-ready record that proves the process was defensible." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    /* ---- color tokens (navy + gold + blue) ---- */
+    --bg:#05080F;
+    --bg-2:#0A0E1A;
+    --surface:rgba(255,255,255,0.035);
+    --surface-2:rgba(255,255,255,0.055);
+    --border:rgba(255,255,255,0.10);
+    --border-strong:rgba(201,162,75,0.45);
+    --gold:#D4A857;
+    --gold-soft:#C9A24B;
+    --blue:#3B82F6;
+    --blue-soft:#5B95F7;
+    --white:#F5F5F7;
+    --text:#A1A8B5;
+    --muted:#6B7280;
+    /* ---- type ---- */
+    --display:"Inter Tight", system-ui, sans-serif;
+    --mono:"JetBrains Mono", ui-monospace, monospace;
+    --serif:"Instrument Serif", Georgia, serif;
+    --maxw:1200px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--display);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  a{color:inherit;text-decoration:none}
+  ::selection{background:rgba(212,168,87,0.3);color:var(--white)}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+  .accent{color:var(--gold)}
+
+  /* ---------- eyebrow / headline rhythm ---------- */
+  .eyebrow{
+    font-family:var(--mono);
+    text-transform:uppercase;
+    letter-spacing:0.28em;
+    font-size:12px;
+    color:var(--blue-soft);
+    display:block;
+    text-align:center;
+    margin-bottom:22px;
+  }
+  h2.section-title{
+    font-family:var(--display);
+    font-weight:700;
+    font-size:clamp(30px,4.4vw,52px);
+    line-height:1.08;
+    letter-spacing:-0.02em;
+    color:var(--white);
+    text-align:center;
+    max-width:880px;
+    margin:0 auto;
+  }
+  .subhead{
+    text-align:center;
+    max-width:620px;
+    margin:20px auto 0;
+    font-size:18px;
+    color:var(--text);
+  }
+  section{position:relative;padding:130px 0}
+
+  /* ---------- buttons ---------- */
+  .btn{
+    display:inline-flex;align-items:center;gap:9px;
+    font-family:var(--display);font-weight:600;font-size:15px;
+    padding:14px 26px;border-radius:999px;cursor:pointer;
+    transition:transform .2s ease, background .2s ease, border-color .2s ease;
+    border:1px solid transparent;white-space:nowrap;
+  }
+  .btn:hover{transform:translateY(-2px)}
+  .btn-primary{background:var(--blue);color:#fff}
+  .btn-primary:hover{background:#2f74e8}
+  .btn-gold{background:transparent;color:var(--gold);border-color:var(--border-strong)}
+  .btn-gold:hover{background:rgba(212,168,87,0.08)}
+  .btn-ghost{background:transparent;color:var(--text);border-color:var(--border)}
+  .btn-ghost:hover{color:var(--white);border-color:rgba(255,255,255,0.25)}
+  .btn .arrow{transition:transform .2s ease}
+  .btn:hover .arrow{transform:translateX(3px)}
+
+  /* ---------- glass card ---------- */
+  .card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:18px;
+    backdrop-filter:blur(10px);
+  }
+
+  /* ====================================================== NAV */
+  .topnav{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    backdrop-filter:blur(14px);
+    background:rgba(5,8,15,0.55);
+    border-bottom:1px solid rgba(255,255,255,0.05);
+  }
+  .topnav .wrap{display:flex;align-items:center;justify-content:space-between;height:72px}
+  .brand{display:flex;align-items:center;gap:11px}
+  .brand .mark{width:30px;height:30px}
+  .brand .name{
+    font-family:var(--display);font-weight:700;color:var(--white);
+    letter-spacing:0.16em;font-size:16px;text-transform:uppercase;
+  }
+  .navlinks{
+    display:flex;align-items:center;gap:4px;
+    background:rgba(255,255,255,0.04);
+    border:1px solid var(--border);
+    border-radius:999px;padding:5px;
+  }
+  .navlinks a{
+    font-size:14px;color:var(--text);padding:8px 15px;border-radius:999px;
+    transition:color .2s, background .2s;
+  }
+  .navlinks a:hover{color:var(--white)}
+  .navlinks a.active{background:rgba(255,255,255,0.07);color:var(--white)}
+  .nav-cta{display:flex;align-items:center;gap:10px}
+  .nav-cta .signin{font-size:14px;color:var(--text);display:flex;align-items:center;gap:6px}
+  .nav-cta .signin:hover{color:var(--white)}
+  .menu-toggle{display:none;background:none;border:none;color:var(--white);cursor:pointer}
+
+  /* ====================================================== HERO */
+  .hero{padding:190px 0 150px;text-align:center;overflow:hidden}
+  .hero-bg{position:absolute;inset:0;z-index:0;pointer-events:none}
+  .hero-bg svg{width:100%;height:100%}
+  .hero-glow{
+    position:absolute;top:-10%;left:50%;transform:translateX(-50%);
+    width:900px;height:700px;
+    background:radial-gradient(ellipse at center,rgba(59,130,246,0.16),transparent 62%);
+    z-index:0;pointer-events:none;
+  }
+  .hero-inner{position:relative;z-index:2}
+  .hero h1{
+    font-family:var(--display);font-weight:800;
+    font-size:clamp(44px,7.4vw,88px);
+    line-height:1.02;letter-spacing:-0.03em;color:var(--white);
+  }
+  .hero .sub{max-width:560px;margin:26px auto 0;font-size:19px;color:var(--text)}
+  .hero .cta-row{display:flex;gap:14px;justify-content:center;margin-top:38px;flex-wrap:wrap}
+  .node-label{
+    font-family:var(--mono);font-size:12px;fill:rgba(255,255,255,0.28);
+    letter-spacing:0.04em;
+  }
+
+  /* ====================================================== STACK STRIP */
+  .strip{padding:70px 0 40px;text-align:center}
+  .strip .cap{
+    font-family:var(--mono);text-transform:uppercase;letter-spacing:0.24em;
+    font-size:11px;color:var(--muted);margin-bottom:34px;
+  }
+  .platforms{
+    display:flex;align-items:center;justify-content:center;gap:54px;flex-wrap:wrap;
+    opacity:.85;
+  }
+  .platforms .p{
+    font-family:var(--display);font-weight:700;font-size:20px;color:#cdd3dd;
+    display:flex;align-items:center;gap:9px;
+  }
+  .platforms .p .dot{width:7px;height:7px;border-radius:50%;background:var(--gold);opacity:.7}
+  .strip .note{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:30px;letter-spacing:0.05em}
+
+  /* ====================================================== MARKET METRICS */
+  .metrics-sec{padding:80px 0 110px}
+  .metrics-card{display:grid;grid-template-columns:repeat(4,1fr);padding:46px 20px;gap:0}
+  .metric{text-align:center;padding:8px 22px;position:relative}
+  .metric + .metric::before{
+    content:"";position:absolute;left:0;top:12%;height:76%;width:1px;background:var(--border);
+  }
+  .metric .num{
+    font-family:var(--display);font-weight:700;color:var(--gold);
+    font-size:clamp(30px,3.6vw,44px);line-height:1;letter-spacing:-0.02em;
+  }
+  .metric .lbl{
+    font-family:var(--mono);text-transform:uppercase;letter-spacing:0.12em;
+    font-size:11px;color:var(--text);margin-top:14px;line-height:1.5;
+  }
+  .metrics-source{font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;margin-top:26px;letter-spacing:0.04em}
+
+  /* ====================================================== PROBLEM */
+  .problem{background:transparent}
+  .problem-head{padding:46px;margin-bottom:48px}
+  .problem-head h2{text-align:left;margin:0;max-width:760px}
+  .problem-head p{margin-top:22px;max-width:720px;font-size:17px}
+  .pgrid{display:flex;flex-direction:column;gap:24px}
+  .prow{
+    display:grid;grid-template-columns:1fr 1fr;gap:32px;padding:40px;align-items:center;
+  }
+  .prow .icon{
+    width:42px;height:42px;border-radius:11px;display:grid;place-items:center;
+    background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.25);margin-bottom:18px;
+  }
+  .prow h3{font-family:var(--display);font-weight:600;font-size:21px;color:var(--white);margin-bottom:12px}
+  .prow .pdesc{font-size:15.5px}
+  .prow .stat .big{
+    font-family:var(--display);font-weight:700;color:var(--white);
+    font-size:clamp(34px,4vw,52px);line-height:1;letter-spacing:-0.02em;
+  }
+  .prow .stat .supp{margin-top:16px;font-size:15px}
+
+  /* principle quote (serif) */
+  .principle{padding:90px 0 0;text-align:center}
+  .principle blockquote{
+    font-family:var(--serif);font-style:italic;font-weight:400;
+    font-size:clamp(24px,3.2vw,34px);line-height:1.35;color:var(--white);
+    max-width:880px;margin:0 auto;letter-spacing:0.005em;
+  }
+  .principle .attr{
+    font-family:var(--mono);font-size:12px;letter-spacing:0.14em;text-transform:uppercase;
+    color:var(--gold);margin-top:26px;
+  }
+
+  /* ====================================================== COMPARISON */
+  .compare{background:transparent}
+  .ctable{margin-top:54px;overflow:hidden;border-radius:18px;border:1px solid var(--border)}
+  .ctable .crow{display:grid;grid-template-columns:1.3fr 1fr 1fr 1.1fr;align-items:center}
+  .ctable .crow:not(:last-child){border-bottom:1px solid var(--border)}
+  .ctable .chead{background:rgba(255,255,255,0.02)}
+  .ctable .cell{padding:22px 20px;text-align:center;font-size:14px}
+  .ctable .cell.row-label{text-align:left;color:var(--white);font-weight:500;font-size:15px}
+  .ctable .col-head{
+    font-family:var(--mono);text-transform:uppercase;letter-spacing:0.08em;font-size:12px;color:var(--text);
+    line-height:1.5;
+  }
+  .ctable .maveria-col{background:rgba(212,168,87,0.05)}
+  .ctable .maveria-head .rec{
+    font-family:var(--mono);font-size:10px;letter-spacing:0.18em;color:var(--gold);display:block;margin-bottom:7px;
+  }
+  .ctable .maveria-head .nm{font-family:var(--display);font-weight:700;color:var(--gold);font-size:16px;letter-spacing:0.04em}
+  .ctable .val-mono{font-family:var(--mono);font-size:13px;color:var(--text)}
+  .ctable .maveria-col .val-mono{color:var(--gold)}
+  .mark{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;font-size:13px}
+  .mark.no{background:rgba(255,255,255,0.05);color:var(--muted)}
+  .mark.yes{background:rgba(212,168,87,0.14);color:var(--gold)}
+  .compare .cta-center{text-align:center;margin-top:44px}
+
+  /* ====================================================== MODULES */
+  .modules{background:linear-gradient(180deg,rgba(7,11,22,0.85) 0%,rgba(5,8,15,0.6) 100%)}
+  .mod-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:58px}
+  .mod{padding:34px}
+  .mod .tile{
+    width:50px;height:50px;border-radius:13px;display:grid;place-items:center;margin-bottom:24px;
+  }
+  .mod.m1 .tile{background:rgba(212,168,87,0.12);border:1px solid rgba(212,168,87,0.3)}
+  .mod.m2 .tile{background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.3)}
+  .mod.m3 .tile{background:rgba(255,255,255,0.06);border:1px solid var(--border)}
+  .mod .mlabel{font-family:var(--mono);font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+  .mod h3{font-family:var(--display);font-weight:700;font-size:23px;color:var(--white);margin-bottom:14px;letter-spacing:-0.01em}
+  .mod p{font-size:15px;margin-bottom:22px}
+  .mod ul{list-style:none;display:flex;flex-direction:column;gap:11px}
+  .mod li{display:flex;gap:10px;font-size:14.5px;color:#c3c9d4;align-items:flex-start}
+  .mod li .b{width:6px;height:6px;border-radius:50%;margin-top:8px;flex:none}
+  .mod.m1 li .b{background:var(--gold)}
+  .mod.m2 li .b{background:var(--blue)}
+  .mod.m3 li .b{background:#8b93a3}
+
+  /* ====================================================== ARCHITECTURE */
+  .arch .flow{
+    display:flex;align-items:stretch;gap:0;margin-top:56px;flex-wrap:wrap;
+    border:1px solid var(--border);border-radius:18px;overflow:hidden;
+  }
+  .arch .step{flex:1 1 0;min-width:180px;padding:32px 26px;position:relative}
+  .arch .step:not(:last-child){border-right:1px solid var(--border)}
+  .arch .step .n{font-family:var(--mono);font-size:11px;color:var(--gold);letter-spacing:0.14em;margin-bottom:14px}
+  .arch .step h4{font-family:var(--display);font-weight:600;color:var(--white);font-size:17px;margin-bottom:9px}
+  .arch .step p{font-size:13.5px;line-height:1.55}
+  .arch .guarantee{
+    margin-top:24px;text-align:center;font-family:var(--mono);font-size:12.5px;
+    color:var(--text);letter-spacing:0.04em;
+  }
+  .arch .guarantee b{color:var(--gold);font-weight:600}
+
+  /* ====================================================== FOUNDER */
+  .founder-card{
+    max-width:560px;margin:54px auto 0;padding:42px;text-align:center;
+    display:flex;flex-direction:column;align-items:center;
+  }
+  .founder-card .avatar{
+    width:96px;height:96px;border-radius:50%;display:grid;place-items:center;
+    background:linear-gradient(135deg,rgba(59,130,246,0.25),rgba(212,168,87,0.2));
+    border:1px solid var(--border);font-family:var(--display);font-weight:700;
+    font-size:30px;color:var(--white);margin-bottom:22px;
+  }
+  .founder-card .fname{font-family:var(--display);font-weight:700;font-size:22px;color:var(--white)}
+  .founder-card .frole{font-family:var(--mono);font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:var(--blue-soft);margin-top:8px}
+  .founder-card .fbio{margin-top:18px;font-size:15.5px;max-width:440px}
+  .founder-card .flink{
+    margin-top:22px;display:inline-flex;align-items:center;gap:8px;
+    font-family:var(--mono);font-size:13px;color:var(--gold);
+    border:1px solid var(--border-strong);padding:9px 18px;border-radius:999px;transition:background .2s;
+  }
+  .founder-card .flink:hover{background:rgba(212,168,87,0.08)}
+
+  /* ====================================================== FINAL CTA */
+  .final{text-align:center;padding:140px 0}
+  .final-glow{
+    position:absolute;bottom:-20%;left:50%;transform:translateX(-50%);
+    width:800px;height:600px;
+    background:radial-gradient(ellipse at center,rgba(212,168,87,0.12),transparent 62%);z-index:0;
+  }
+  .final .inner{position:relative;z-index:2}
+  .final h2{
+    font-family:var(--display);font-weight:800;font-size:clamp(34px,5.4vw,62px);
+    line-height:1.05;letter-spacing:-0.025em;color:var(--white);max-width:780px;margin:0 auto;
+  }
+  .final p{max-width:560px;margin:24px auto 0;font-size:17px}
+  .final .cta-row{margin-top:36px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+
+  /* ====================================================== FOOTER */
+  footer{border-top:1px solid rgba(255,255,255,0.06);padding:56px 0 40px}
+  .foot-grid{display:flex;justify-content:space-between;gap:40px;flex-wrap:wrap}
+  .foot-brand{max-width:300px}
+  .foot-brand .tag{margin-top:16px;font-size:14px;color:var(--muted)}
+  .foot-cols{display:flex;gap:64px;flex-wrap:wrap}
+  .foot-col h5{font-family:var(--mono);font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+  .foot-col a{display:block;font-size:14px;color:var(--text);margin-bottom:11px}
+  .foot-col a:hover{color:var(--white)}
+  .foot-bottom{
+    margin-top:50px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.05);
+    display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:0.04em;
+  }
+
+  /* ====================================================== FLOATING PILL NAV */
+  .pillnav{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:90;
+    display:flex;align-items:center;gap:4px;padding:6px;
+    background:rgba(10,14,26,0.8);backdrop-filter:blur(16px);
+    border:1px solid var(--border);border-radius:999px;
+    box-shadow:0 10px 40px rgba(0,0,0,0.5);
+  }
+  .pillnav a{
+    display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text);
+    padding:9px 16px;border-radius:999px;transition:background .2s,color .2s;
+  }
+  .pillnav a.active{background:rgba(255,255,255,0.08);color:var(--white)}
+  .pillnav a:hover{color:var(--white)}
+  .pillnav svg{flex:none}
+
+  /* ====================================================== SPACE ENVIRONMENT */
+  /* fixed deep-space backdrop behind the whole page */
+  .space-bg{position:fixed;inset:0;z-index:-2;overflow:hidden;pointer-events:none;background:
+    radial-gradient(1200px 800px at 78% -8%, rgba(59,130,246,0.10), transparent 60%),
+    radial-gradient(1000px 700px at 12% 12%, rgba(212,168,87,0.06), transparent 60%),
+    linear-gradient(180deg,#04060D 0%, #05080F 40%, #070B16 100%);}
+  .stars,.stars2,.stars3{position:absolute;top:0;left:0;border-radius:50%;background:transparent}
+  .stars{width:1px;height:1px;animation:drift 240s linear infinite}
+  .stars2{width:2px;height:2px;animation:drift 380s linear infinite;opacity:.8}
+  .stars3{width:2px;height:2px;animation:twinkle 6s ease-in-out infinite alternate}
+  @keyframes drift{from{transform:translateY(0)}to{transform:translateY(-1600px)}}
+  @keyframes twinkle{from{opacity:.35}to{opacity:.95}}
+  /* slow nebula clouds */
+  .nebula{position:absolute;border-radius:50%;filter:blur(70px);opacity:.5;mix-blend-mode:screen}
+  .nebula.n-a{top:-120px;right:-80px;width:560px;height:560px;background:radial-gradient(circle,rgba(59,130,246,0.5),transparent 65%)}
+  .nebula.n-b{top:38%;left:-160px;width:620px;height:620px;background:radial-gradient(circle,rgba(124,92,200,0.32),transparent 65%);animation:float 26s ease-in-out infinite}
+  .nebula.n-c{bottom:-160px;right:8%;width:520px;height:520px;background:radial-gradient(circle,rgba(212,168,87,0.28),transparent 65%);animation:float 32s ease-in-out infinite reverse}
+  @keyframes float{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-40px)}}
+
+  /* reusable EARTH-FROM-ORBIT layer dropped into a section */
+  .orbit{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .orbit svg{position:absolute;width:140%;left:-20%;bottom:-2px;height:auto}
+  /* warp streaks */
+  .streaks{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;opacity:.5}
+  .streaks span{position:absolute;height:1px;background:linear-gradient(90deg,transparent,rgba(180,205,255,0.55),transparent);transform-origin:left center}
+  /* dark legibility overlay so text stays readable over the imagery */
+  .scrim{position:absolute;inset:0;z-index:1;pointer-events:none;
+    background:linear-gradient(180deg, rgba(5,8,15,0.72) 0%, rgba(5,8,15,0.45) 30%, rgba(5,8,15,0.55) 70%, rgba(5,8,15,0.85) 100%);}
+  /* sections that carry imagery need their content lifted above z0/z1 */
+  .problem .wrap,.compare .wrap{position:relative;z-index:2}
+
+  /* ====================================================== reveal */
+  .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease, transform .7s ease}
+  .reveal.in{opacity:1;transform:none}
+
+  /* ====================================================== responsive */
+  @media (max-width:920px){
+    .navlinks{display:none}
+    .menu-toggle{display:block}
+    .metrics-card{grid-template-columns:repeat(2,1fr);gap:30px 0}
+    .metric + .metric::before{display:none}
+    .mod-grid{grid-template-columns:1fr}
+    .prow{grid-template-columns:1fr;gap:18px}
+    .ctable .crow{grid-template-columns:1.2fr .9fr .9fr 1fr}
+    .ctable .cell{padding:16px 8px;font-size:12px}
+    .arch .step:not(:last-child){border-right:none;border-bottom:1px solid var(--border)}
+    .pillnav a span{display:none}
+  }
+  @media (max-width:560px){
+    section{padding:90px 0}
+    .metrics-card{grid-template-columns:1fr}
+    .problem-head,.prow,.mod,.founder-card{padding:28px}
+    .ctable .col-head{font-size:10px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .reveal{opacity:1;transform:none;transition:none}
+    html{scroll-behavior:auto}
+    .stars,.stars2,.stars3,.nebula{animation:none !important}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ DEEP SPACE BACKDROP (procedural, fixed) ============ -->
+<div class="space-bg" aria-hidden="true">
+  <div class="nebula n-a"></div>
+  <div class="nebula n-b"></div>
+  <div class="nebula n-c"></div>
+  <div class="stars" id="stars"></div>
+  <div class="stars2" id="stars2"></div>
+  <div class="stars3" id="stars3"></div>
+</div>
+
+<!-- ============ TOP NAV ============ -->
+<nav class="topnav">
+  <div class="wrap">
+    <a href="#top" class="brand">
+      <svg class="mark" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="16" cy="16" r="14" stroke="url(#g1)" stroke-width="1.6"/>
+        <path d="M16 4 C9 8, 9 24, 16 28 C23 24, 23 8, 16 4 Z" stroke="var(--gold)" stroke-width="1.4" fill="none" opacity="0.85"/>
+        <circle cx="16" cy="16" r="3.2" fill="var(--gold)"/>
+        <defs><linearGradient id="g1" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#3B82F6"/><stop offset="1" stop-color="#D4A857"/></linearGradient></defs>
+      </svg>
+      <span class="name">Maveria</span>
+    </a>
+    <div class="navlinks">
+      <a href="#top" class="active">Home</a>
+      <a href="#problem">The Problem</a>
+      <a href="#compare">Why Maveria</a>
+      <a href="#modules">Platform</a>
+      <a href="#architecture">Architecture</a>
+      <a href="#founder">Founder</a>
+    </div>
+    <div class="nav-cta">
+      <a href="mailto:support@maveria.sbs" class="signin">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        Sign In
+      </a>
+      <a href="#contact" class="btn btn-primary">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Book a Session
+      </a>
+    </div>
+    <button class="menu-toggle" onclick="document.getElementById('contact').scrollIntoView()" aria-label="Menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero" id="top">
+  <div class="hero-glow"></div>
+  <div class="hero-bg" aria-hidden="true">
+    <svg viewBox="0 0 1440 760" preserveAspectRatio="xMidYMid slice">
+      <g stroke="rgba(255,255,255,0.07)" stroke-width="1" fill="none">
+        <path d="M120,180 C420,300 600,360 720,380"/>
+        <path d="M150,420 C430,400 600,390 720,380"/>
+        <path d="M180,640 C440,520 600,420 720,380"/>
+        <path d="M1320,200 C1020,300 840,360 720,380"/>
+        <path d="M1300,440 C1010,400 840,390 720,380"/>
+        <path d="M1270,650 C1000,520 840,420 720,380"/>
+      </g>
+      <g>
+        <circle cx="120" cy="180" r="3" fill="#3B82F6"/><circle cx="150" cy="420" r="3" fill="#3B82F6"/><circle cx="180" cy="640" r="3" fill="#3B82F6"/>
+        <circle cx="1320" cy="200" r="3" fill="#D4A857"/><circle cx="1300" cy="440" r="3" fill="#D4A857"/><circle cx="1270" cy="650" r="3" fill="#D4A857"/>
+        <circle cx="720" cy="380" r="5" fill="#D4A857" opacity="0.9"/>
+      </g>
+      <g class="node-label" text-anchor="middle">
+        <text x="120" y="165">RelativityOne</text>
+        <text x="150" y="405">Everlaw</text>
+        <text x="180" y="625">DISCO</text>
+        <text x="1320" y="185" text-anchor="end" style="fill:rgba(212,168,87,0.4)">Privilege</text>
+        <text x="1300" y="425" text-anchor="end" style="fill:rgba(212,168,87,0.4)">Hallucination QC</text>
+        <text x="1270" y="635" text-anchor="end" style="fill:rgba(212,168,87,0.4)">Defensibility Record</text>
+      </g>
+    </svg>
+  </div>
+  <div class="wrap hero-inner">
+    <h1>Everyone Has AI Review.<br>Nobody Made It <span class="accent">Defensible.</span></h1>
+    <p class="sub">Maveria is the independent verification and privilege-protection layer that sits on top of the e-discovery platform your counsel already uses.</p>
+    <div class="cta-row">
+      <a href="#contact" class="btn btn-primary">Book a Discovery Session <span class="arrow">→</span></a>
+      <a href="#modules" class="btn btn-gold">See How It Works</a>
+    </div>
+  </div>
+</header>
+
+<!-- ============ PLATFORM STRIP ============ -->
+<div class="strip">
+  <div class="wrap">
+    <div class="cap">Works on top of the platforms your counsel already runs</div>
+    <div class="platforms">
+      <div class="p"><span class="dot"></span>RelativityOne</div>
+      <div class="p"><span class="dot"></span>Everlaw</div>
+      <div class="p"><span class="dot"></span>DISCO</div>
+      <div class="p"><span class="dot"></span>Reveal</div>
+    </div>
+    <div class="note">Connects via platform APIs — no migration, no second copy of your data.</div>
+  </div>
+</div>
+
+<!-- ============ MARKET METRICS (honest market stats, not company performance) ============ -->
+<section class="metrics-sec" style="padding-top:50px">
+  <div class="wrap">
+    <span class="eyebrow reveal">The Market Shift</span>
+    <div class="metrics-card card reveal">
+      <div class="metric">
+        <div class="num">$0.11–0.50</div>
+        <div class="lbl">Per-doc AI review today — down from $1.50–3.00. Review is now a free feature, not a moat.</div>
+      </div>
+      <div class="metric">
+        <div class="num">198 / 200</div>
+        <div class="lbl">Am Law firms running the same platform daily — and the same AI you must now defend in court.</div>
+      </div>
+      <div class="metric">
+        <div class="num">1 doc</div>
+        <div class="lbl">One inadvertent privilege production = waiver + malpractice exposure + sanctions risk.</div>
+      </div>
+      <div class="metric">
+        <div class="num">$20.7B → $46B</div>
+        <div class="lbl">E-discovery market 2026 → 2034. Spend is shifting from review hours to trust and defensibility.</div>
+      </div>
+    </div>
+    <div class="metrics-source">Figures reflect publicly reported industry data. Maveria does not publish client-attributable results without consent.</div>
+  </div>
+</section>
+
+<!-- ============ PROBLEM ============ -->
+<section class="problem" id="problem">
+  <div class="orbit" aria-hidden="true">
+    <svg viewBox="0 0 1440 500" preserveAspectRatio="xMidYMax slice">
+      <defs>
+        <radialGradient id="earthBody" cx="50%" cy="125%" r="75%">
+          <stop offset="55%" stop-color="#0a1830"/>
+          <stop offset="80%" stop-color="#0c2238"/>
+          <stop offset="100%" stop-color="#1b4a6e"/>
+        </radialGradient>
+        <radialGradient id="atmos" cx="50%" cy="118%" r="70%">
+          <stop offset="80%" stop-color="rgba(90,170,255,0)"/>
+          <stop offset="92%" stop-color="rgba(120,190,255,0.45)"/>
+          <stop offset="96%" stop-color="rgba(150,205,255,0.85)"/>
+          <stop offset="98.5%" stop-color="rgba(205,232,255,1)"/>
+          <stop offset="100%" stop-color="rgba(140,200,255,0)"/>
+        </radialGradient>
+      </defs>
+      <ellipse cx="720" cy="1180" rx="1150" ry="900" fill="url(#earthBody)"/>
+      <ellipse cx="720" cy="1180" rx="1150" ry="900" fill="url(#atmos)"/>
+    </svg>
+  </div>
+  <div class="streaks" id="streaks-problem" aria-hidden="true"></div>
+  <div class="scrim" aria-hidden="true"></div>
+  <div class="wrap">
+    <span class="eyebrow reveal">The Problem</span>
+    <div class="problem-head card reveal">
+      <h2 class="section-title">Everyone Has Free AI Review. <span class="accent">Nobody Made It Trustable.</span></h2>
+      <p>The value didn't disappear when AI review went free — it moved. From <em>doing</em> the review to being able to <em>defend</em> it. When a model misrepresents a document, that error cascades into wrong coding decisions across the whole matter. In litigation, "rarely wrong" means wrong in the case that ends a career.</p>
+    </div>
+
+    <div class="pgrid">
+      <div class="prow card reveal">
+        <div>
+          <div class="icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5B95F7" stroke-width="1.8"><path d="M12 2 L2 7 v6 c0 5 4 8 10 9 6-1 10-4 10-9 V7 Z"/><path d="M9 12l2 2 4-4"/></svg>
+          </div>
+          <h3>Hallucinated Summaries, Cascading Errors</h3>
+          <p class="pdesc">GenAI coders generate summaries and rationales that read fluently and sometimes aren't supported by the document. Reviewers code off those summaries. One unsupported claim quietly propagates across thousands of decisions.</p>
+        </div>
+        <div class="stat">
+          <div class="big">73%</div>
+          <div class="supp">of AI initiatives stall on a lack of verification and data discipline — not on model quality. The platforms grade their own homework; a judge doesn't accept that.</div>
+        </div>
+      </div>
+
+      <div class="prow card reveal">
+        <div>
+          <div class="icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5B95F7" stroke-width="1.8"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          </div>
+          <h3>Privilege Is Where the Malpractice Lives</h3>
+          <p class="pdesc">Dual-purpose advice, forwarded chains that break privilege, third parties that destroy it. A general-relevance model is not conservative enough for the one call where being wrong is a waiver — and no GC bets that on a feature buried in their counsel's platform.</p>
+        </div>
+        <div class="stat">
+          <div class="big">FRE 502(b)</div>
+          <div class="supp">Inadvertent waiver and clawback (502(d)) turn a single missed document into a front-page failure. The leak gate is the last line before production goes out the door.</div>
+        </div>
+      </div>
+
+      <div class="prow card reveal">
+        <div>
+          <div class="icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5B95F7" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+          </div>
+          <h3>No Record, No Defense</h3>
+          <p class="pdesc">Under FRCP 26(g)'s "reasonable inquiry" standard, the question is: how do you know the documents you withheld were correctly classified? Most teams can't answer with a statistically valid protocol — they can only point at the discard pile and hope.</p>
+        </div>
+        <div class="stat">
+          <div class="big">26(g)</div>
+          <div class="supp">The discard ("null") set is the single most-skipped step in AI review. Maveria samples it independently to measure what's hiding there — and writes down the proof.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="principle reveal">
+      <blockquote>"Relativity can't credibly validate Relativity's own AI. The vendor grading its own homework is not a defense you take to a judge. Independence isn't a feature an incumbent can ship — it's the whole product."</blockquote>
+      <div class="attr">— Maveria's founding principle</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COMPARISON ============ -->
+<section class="compare" id="compare">
+  <div class="orbit" aria-hidden="true">
+    <svg viewBox="0 0 1440 500" preserveAspectRatio="xMidYMax slice">
+      <ellipse cx="720" cy="1180" rx="1150" ry="900" fill="url(#earthBody)"/>
+      <ellipse cx="720" cy="1180" rx="1150" ry="900" fill="url(#atmos)"/>
+    </svg>
+  </div>
+  <div class="streaks" id="streaks-compare" aria-hidden="true"></div>
+  <div class="scrim" aria-hidden="true"></div>
+  <div class="wrap">
+    <span class="eyebrow reveal">Why Maveria</span>
+    <h2 class="section-title reveal">You Don't Need Another Review Platform. <span class="accent">You Need the Defensibility Layer.</span></h2>
+    <p class="subhead reveal">See where an independent verification layer sits against the alternatives teams reach for first.</p>
+
+    <div class="ctable reveal">
+      <div class="crow chead">
+        <div class="cell"></div>
+        <div class="cell col-head">Incumbent Platform AI</div>
+        <div class="cell col-head">In-House / DIY QC</div>
+        <div class="cell maveria-col maveria-head">
+          <span class="rec">Recommended</span>
+          <span class="nm">Maveria</span>
+        </div>
+      </div>
+      <div class="crow">
+        <div class="cell row-label">Independent of the tool that did the coding</div>
+        <div class="cell"><span class="mark no">✕</span></div>
+        <div class="cell"><span class="val-mono">Partial</span></div>
+        <div class="cell maveria-col"><span class="mark yes">✓</span></div>
+      </div>
+      <div class="crow">
+        <div class="cell row-label">Null-set sampling for recall &amp; elusion</div>
+        <div class="cell"><span class="mark no">✕</span></div>
+        <div class="cell"><span class="val-mono">Manual</span></div>
+        <div class="cell maveria-col"><span class="mark yes">✓</span></div>
+      </div>
+      <div class="crow">
+        <div class="cell row-label">Hallucination detection on AI summaries</div>
+        <div class="cell"><span class="mark no">✕</span></div>
+        <div class="cell"><span class="mark no">✕</span></div>
+        <div class="cell maveria-col"><span class="mark yes">✓</span></div>
+      </div>
+      <div class="crow">
+        <div class="cell row-label">Conservative privilege pass + leak gate</div>
+        <div class="cell"><span class="val-mono">Generic</span></div>
+        <div class="cell"><span class="val-mono">Hours-heavy</span></div>
+        <div class="cell maveria-col"><span class="val-mono">Dedicated</span></div>
+      </div>
+      <div class="crow">
+        <div class="cell row-label">Court-ready Defensibility Record</div>
+        <div class="cell"><span class="mark no">✕</span></div>
+        <div class="cell"><span class="val-mono">Ad hoc</span></div>
+        <div class="cell maveria-col"><span class="mark yes">✓</span></div>
+      </div>
+      <div class="crow">
+        <div class="cell row-label">Requires rip-and-replace migration</div>
+        <div class="cell"><span class="val-mono">Often</span></div>
+        <div class="cell"><span class="val-mono">—</span></div>
+        <div class="cell maveria-col"><span class="val-mono">Never</span></div>
+      </div>
+    </div>
+    <div class="cta-center reveal">
+      <a href="#contact" class="btn btn-primary">Run It On Your Next Matter <span class="arrow">→</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MODULES ============ -->
+<section class="modules" id="modules">
+  <div class="wrap">
+    <span class="eyebrow reveal">The Platform</span>
+    <h2 class="section-title reveal">Three Modules, <span class="accent">One Defensible Process.</span></h2>
+    <p class="subhead reveal">Mapped to where AI made discovery riskier — coding quality, privilege, and the record itself.</p>
+
+    <div class="mod-grid">
+      <div class="mod m1 card reveal">
+        <div class="tile">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D4A857" stroke-width="1.7"><path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg>
+        </div>
+        <div class="mlabel">Module 01</div>
+        <h3>Verify</h3>
+        <p>An independent QC engine on the AI's coding — run statistically, not on vibes.</p>
+        <ul>
+          <li><span class="b"></span>Null-set &amp; control-set sampling for recall and elusion</li>
+          <li><span class="b"></span>Hallucination checks that re-derive claims against source text</li>
+          <li><span class="b"></span>Drift &amp; consistency checks against senior seed decisions</li>
+          <li><span class="b"></span>Recall / precision / elusion with confidence intervals</li>
+        </ul>
+      </div>
+
+      <div class="mod m2 card reveal">
+        <div class="tile">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5B95F7" stroke-width="1.7"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        </div>
+        <div class="mlabel">Module 02</div>
+        <h3>Privilege</h3>
+        <p>A dedicated pass far more conservative than any relevance model — the wedge.</p>
+        <ul>
+          <li><span class="b"></span>Relationship-aware detection of legal vs. business advice</li>
+          <li><span class="b"></span>Clawback risk scoring tied to FRE 502(b) / 502(d)</li>
+          <li><span class="b"></span>Drafted privilege-log entries with citations, for sign-off</li>
+          <li><span class="b"></span>Pre-production leak gate on the final production set</li>
+        </ul>
+      </div>
+
+      <div class="mod m3 card reveal">
+        <div class="tile">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c3c9d4" stroke-width="1.7"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
+        </div>
+        <div class="mlabel">Module 03</div>
+        <h3>Record</h3>
+        <p>One immutable, exportable artifact per matter — the thing you attach to a declaration.</p>
+        <ul>
+          <li><span class="b"></span>Validation protocol, sampling methodology &amp; results</li>
+          <li><span class="b"></span>Human-in-the-loop decisions and chain-of-custody</li>
+          <li><span class="b"></span>Model &amp; prompt version history per matter</li>
+          <li><span class="b"></span>Aligned to Sedona Conference principles</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ARCHITECTURE ============ -->
+<section class="arch" id="architecture">
+  <div class="wrap">
+    <span class="eyebrow reveal">How It Connects</span>
+    <h2 class="section-title reveal">The Auditor, <span class="accent">Not a Second Copy of Your Data.</span></h2>
+    <p class="subhead reveal">Maveria connects through platform APIs and works on coding decisions, model outputs, and sampled subsets — never your full corpus.</p>
+
+    <div class="flow reveal">
+      <div class="step">
+        <div class="n">01 — CONNECT</div>
+        <h4>Connector layer</h4>
+        <p>Links to your workspace on RelativityOne, Everlaw, DISCO or Reveal. No migration, no rip-and-replace.</p>
+      </div>
+      <div class="step">
+        <div class="n">02 — SAMPLE</div>
+        <h4>Orchestration</h4>
+        <p>Decides what to pull — null-set samples and high-risk privilege candidates — as review progresses, not just at the end.</p>
+      </div>
+      <div class="step">
+        <div class="n">03 — ANALYZE</div>
+        <h4>Ephemeral enclave</h4>
+        <p>LLM reasoning for privilege and hallucination + classical statistics for the validity math, in a per-matter no-retention enclave.</p>
+      </div>
+      <div class="step">
+        <div class="n">04 — RECORD</div>
+        <h4>The only thing that persists</h4>
+        <p>The Defensibility Record store — your system of record for process defensibility, exportable on demand.</p>
+      </div>
+    </div>
+    <div class="guarantee reveal">
+      Built to pass a Fortune-500 infosec review on day one — <b>SOC 2 Type II</b> · <b>per-matter isolation</b> · <b>we never keep your documents.</b>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOUNDER (honest — real founder only) ============ -->
+<section id="founder">
+  <div class="wrap">
+    <span class="eyebrow reveal">Founder</span>
+    <h2 class="section-title reveal">Built by Someone Who Sees <span class="accent">Where the Risk Moved.</span></h2>
+    <div class="founder-card card reveal">
+      <div class="avatar">HB</div>
+      <div class="fname">M. Hakan Bozkurt</div>
+      <div class="frole">Founder</div>
+      <p class="fbio">Building Maveria as the independent trust layer for AI-driven discovery — owning privilege as the wedge and selling to the buyer who actually carries the risk. Reach out to talk about your next matter.</p>
+      <a href="https://www.linkedin.com/in/mhakanbozkurt/" target="_blank" rel="noopener" class="flink">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.49 6S0 4.88 0 3.5 1.11 1 2.49 1s2.49 1.12 2.49 2.5zM.24 8h4.49v14H.24V8zm7.5 0h4.3v1.92h.06c.6-1.13 2.07-2.32 4.26-2.32 4.56 0 5.4 3 5.4 6.9V22h-4.49v-6.6c0-1.57-.03-3.6-2.2-3.6-2.2 0-2.54 1.72-2.54 3.49V22H7.74V8z"/></svg>
+        Connect on LinkedIn
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FINAL CTA ============ -->
+<section class="final" id="contact">
+  <div class="final-glow"></div>
+  <div class="wrap inner">
+    <span class="eyebrow reveal">Get Started</span>
+    <h2 class="reveal">Insurance Against the <span class="accent">Seven-Figure Mistake.</span></h2>
+    <p class="reveal">Start with one matter on whatever platform your counsel already uses. We'll run privilege protection and hand back a defensibility record — no migration, no risk to your stack.</p>
+    <div class="cta-row reveal">
+      <a href="mailto:support@maveria.sbs?subject=Maveria%20Discovery%20Session" class="btn btn-primary">Book a Discovery Session <span class="arrow">→</span></a>
+      <a href="mailto:support@maveria.sbs" class="btn btn-ghost">support@maveria.sbs</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <div class="brand">
+          <svg class="mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+            <circle cx="16" cy="16" r="14" stroke="#D4A857" stroke-width="1.4" opacity="0.7"/>
+            <circle cx="16" cy="16" r="3.2" fill="#D4A857"/>
+          </svg>
+          <span class="name">Maveria</span>
+        </div>
+        <p class="tag">The independent verification and privilege-protection layer for AI-driven discovery. The auditor, not the reviewer.</p>
+      </div>
+      <div class="foot-cols">
+        <div class="foot-col">
+          <h5>Platform</h5>
+          <a href="#modules">Verify</a>
+          <a href="#modules">Privilege</a>
+          <a href="#modules">Record</a>
+          <a href="#architecture">Architecture</a>
+        </div>
+        <div class="foot-col">
+          <h5>Company</h5>
+          <a href="#compare">Why Maveria</a>
+          <a href="#founder">Founder</a>
+          <a href="https://www.linkedin.com/in/mhakanbozkurt/" target="_blank" rel="noopener">LinkedIn</a>
+          <a href="mailto:support@maveria.sbs">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 Maveria. All rights reserved.</span>
+      <span>support@maveria.sbs · maveria.sbs</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ============ FLOATING PILL NAV ============ -->
+<div class="pillnav">
+  <a href="#top" class="active" data-target="top">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+    <span>Home</span>
+  </a>
+  <a href="#modules" data-target="modules">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+    <span>Platform</span>
+  </a>
+  <a href="#compare" data-target="compare">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg>
+    <span>Why Maveria</span>
+  </a>
+</div>
+
+<script>
+  // ---- procedural starfield (box-shadow technique) ----
+  (function(){
+    const reduce = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+    function field(id, count, maxSize){
+      const el = document.getElementById(id);
+      if(!el) return;
+      const shadows = [];
+      for(let i=0;i<count;i++){
+        const x = Math.floor(Math.random()*2000);
+        const y = Math.floor(Math.random()*2400);
+        const dim = (Math.random()*0.6+0.4).toFixed(2);
+        shadows.push(`${x}px ${y}px rgba(255,255,255,${dim})`);
+      }
+      el.style.boxShadow = shadows.join(',');
+    }
+    field('stars', 380, 1);
+    field('stars2', 140, 2);
+    field('stars3', 90, 2);
+
+    // ---- warp streaks radiating from a vanishing point (earth-from-orbit feel) ----
+    function streaks(id, count){
+      const el = document.getElementById(id);
+      if(!el) return;
+      const frag = document.createDocumentFragment();
+      for(let i=0;i<count;i++){
+        const s = document.createElement('span');
+        const top = Math.random()*100;
+        const left = Math.random()*100;
+        const len = Math.random()*180+40;
+        const ang = (Math.random()*40-20) + (left<50?8:-8);
+        s.style.top = top+'%';
+        s.style.left = left+'%';
+        s.style.width = len+'px';
+        s.style.transform = `rotate(${ang}deg)`;
+        s.style.opacity = (Math.random()*0.5+0.2).toFixed(2);
+        frag.appendChild(s);
+      }
+      el.appendChild(frag);
+    }
+    streaks('streaks-problem', 26);
+    streaks('streaks-compare', 26);
+  })();
+
+  // scroll reveal
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  },{threshold:0.12, rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+  // active state for top + pill nav based on section in view
+  const sections = ['top','problem','compare','modules','architecture','founder','contact'];
+  const topLinks = document.querySelectorAll('.navlinks a');
+  const pillLinks = document.querySelectorAll('.pillnav a');
+  const spy = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        const id = e.target.id;
+        topLinks.forEach(a=>a.classList.toggle('active', a.getAttribute('href')==='#'+id));
+        // map pill targets
+        const pillMap = {top:'top', problem:'top', compare:'compare', modules:'modules', architecture:'modules', founder:'modules', contact:'modules'};
+        pillLinks.forEach(a=>a.classList.toggle('active', a.dataset.target===pillMap[id]));
+      }
+    });
+  },{threshold:0.4});
+  sections.forEach(id=>{ const el=document.getElementById(id); if(el) spy.observe(el); });
+</script>
+</body>
+</html>
